@@ -39,11 +39,66 @@
 
   Testing the server - run `npm run test-todoServer` command in terminal
  */
-  const express = require('express');
-  const bodyParser = require('body-parser');
-  
-  const app = express();
-  
-  app.use(bodyParser.json());
-  
-  module.exports = app;
+const express = require("express");
+const bodyParser = require("body-parser");
+
+const { v4: uuidv4 } = require("uuid");
+
+const app = express();
+
+app.use(bodyParser.json());
+
+let todos = [{ id: 1, title: "hello", description: "sample todo " }];
+
+app.get("/todos", (req, res) => {
+  res.json(todos);
+});
+
+app.get("/todos/:id", (req, res) => {
+  console.log(req.params);
+  let todo = todos.filter((todo) => todo.id == req.params.id);
+  res.json(todo);
+});
+
+app.post("/todos", (req, res) => {
+  const { title, description } = req.body;
+  const todo = {
+    id: uuidv4(), // Generate a unique ID
+    title,
+    description,
+  };
+  todos.push(todo);
+  res.status(201).json(todo);
+});
+
+app.put("/todos/:id", (req, res) => {
+  const todoId = req.params.id;
+  const updatedTodo = req.body;
+
+  todos.forEach((todo, index) => {
+    if (todo.id == todoId) {
+      todos[index] = { id: todo.id, ...updatedTodo };
+    }
+  });
+
+  res.status(201).json(todos);
+});
+
+app.delete("/todos/:id", (req, res) => {
+  const todoId = req.params.id;
+  const updatedTodo = req.body;
+
+  todos.forEach((todo, index) => {
+    if (todo.id == todoId) {
+      todos.splice(index, 1);
+    }
+  });
+
+  res.status(201).json(todos);
+});
+
+app.listen(8080, () => {
+  console.log("server listenining to request");
+});
+
+module.exports = app;
